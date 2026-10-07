@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/vestigiumincaligne/polka/internal/convert"
 	"github.com/vestigiumincaligne/polka/internal/genres"
 	"github.com/vestigiumincaligne/polka/internal/library"
 	"github.com/vestigiumincaligne/polka/internal/store"
@@ -378,6 +379,13 @@ func (s *Server) handleGetBookForm(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Formats the book can be converted to on download (FB2 sources only).
+	if s.lib != nil && strings.EqualFold(d.Ext, "fb2") {
+		if keys := s.conv.Keys(); len(keys) > 0 {
+			resp["convertFormats"] = keys
+		}
+	}
+
 	if s.lib != nil {
 		if meta, err := s.lib.Meta(d.Folder, d.File, d.Ext); err == nil {
 			resp["annotation"] = meta.AnnotationHTML
@@ -522,6 +530,50 @@ func (s *Server) handleBookCompact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", contentTypeFor("fb2"))
 	w.Header().Set("Content-Disposition", `attachment; filename="`+f.File+`.compact.fb2"`)
 	w.Write(compact)
+}
+
+// handleBookConvert serves an FB2 book converted to another format by an
+// external converter (see internal/convert).
+func (s *Server) handleBookConvert(w http.ResponseWriter, r *http.Request) {
+	f := s.bookFileOr404(w, r)
+	if f == nil {
+		return
+	}
+	format := r.PathValue("format")
+	if !strings.EqualFold(f.Ext, "fb2") || !s.conv.Supports(format) {
+		http.NotFound(w, r)
+		return
+	}
+	// The GET pattern also matches HEAD (download managers, link previews):
+	// answer it without running a conversion nobody will read.
+	if r.Method == http.MethodHead {
+		return
+	}
+
+	data, out, err := s.conv.Convert(r.Context(), format, func() (io.ReadCloser, error) {
+		rc, _, err := s.lib.Open(f.Folder, f.File, f.Ext)
+		return rc, err
+	})
+	switch {
+	case errors.Is(err, convert.ErrBusy):
+		w.Header().Set("Retry-After", "30")
+		http.Error(w, tr(reqLang(r), "convert.busy"), http.StatusServiceUnavailable)
+		return
+	case errors.Is(err, library.ErrNoFile):
+		s.apiError(w, err)
+		return
+	case err != nil:
+		if r.Context().Err() == nil {
+			s.log.Warn("book conversion", "book", f.ID, "format", format, "error", err)
+		}
+		http.Error(w, tr(reqLang(r), "convert.failed"), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", out.Mime)
+	w.Header().Set("Content-Disposition", `attachment; filename="`+f.File+`.`+out.Ext+`"`)
+	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	w.Write(data)
 }
 
 func contentTypeFor(ext string) string {

@@ -67,6 +67,11 @@ export const api = {
   fb2CompactUrl(bookId) {
     return buildUrl(`Images/fb2compact/${bookId}`);
   },
+
+  // The book converted on the server to another format (epub, mobi, …).
+  convertUrl(bookId, format) {
+    return buildUrl(`Images/convert/${format}/${bookId}`);
+  },
 };
 
 export default api;

@@ -57,7 +57,8 @@
 
 .library-admin__results li {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 4px 12px;
   align-items: baseline;
   padding: 8px 4px;
   border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.06));
@@ -88,6 +89,12 @@
   gap: 16px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+/* The native file picker is wider than a narrow phone. */
+.library-admin__import-row input[type="file"] {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .library-admin__replace {
@@ -209,6 +216,7 @@
 
 .library-admin__key-row input {
   flex: 1;
+  min-width: 0;
   font: inherit;
   font-size: 13px;
   padding: 9px 12px;

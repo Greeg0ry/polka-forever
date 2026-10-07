@@ -15,6 +15,7 @@ import (
 	"github.com/vestigiumincaligne/polka/internal/auth"
 	"github.com/vestigiumincaligne/polka/internal/collections"
 	"github.com/vestigiumincaligne/polka/internal/config"
+	"github.com/vestigiumincaligne/polka/internal/convert"
 	"github.com/vestigiumincaligne/polka/internal/enrich"
 	"github.com/vestigiumincaligne/polka/internal/library"
 	"github.com/vestigiumincaligne/polka/internal/store"
@@ -30,6 +31,7 @@ type Server struct {
 	desktop *auth.User     // non-nil in desktop mode: owner auto-login
 	sync    *syncer.Syncer // non-nil in server synchronization mode
 	enrich  *enrich.Provider
+	conv    *convert.Converter   // external FB2 converters; nil if none installed
 	cols    *collections.Service // book collections (collections.db)
 	srcs    sourcesState         // external collection sources sync
 	imp     importState          // state of the background inpx web import
@@ -50,6 +52,12 @@ func New(cfg *config.Config, log *slog.Logger, st *store.Store, lib *library.Lib
 		loginLimiter: newRateLimiter(10, 5*time.Minute),
 		guestLimiter: newRateLimiter(20, time.Minute),
 		secret:       loadSecretKey(cfg.DataDir),
+	}
+	// Conversion is too heavy to hand out to anonymous demo guests.
+	if lib != nil && sync == nil && !s.demoMode() {
+		if s.conv = convert.Find(cfg.ConverterDir); s.conv != nil {
+			log.Info("book conversion enabled", "formats", s.conv.Keys())
+		}
 	}
 	if cfg.DataDir == "" {
 		// tests without a data directory: collections are unavailable
@@ -193,6 +201,7 @@ func New(cfg *config.Config, log *slog.Logger, st *store.Store, lib *library.Lib
 		mux.HandleFunc("GET /Images/fb2/{id}", s.protected(s.handleBookDownload))
 		mux.HandleFunc("GET /Images/zip/{id}", s.protected(s.handleBookZip))
 		mux.HandleFunc("GET /Images/fb2compact/{id}", s.protected(s.handleBookCompact))
+		mux.HandleFunc("GET /Images/convert/{format}/{id}", s.protected(s.handleBookConvert))
 
 		// Settings (administrator only)
 		if !s.demoMode() {

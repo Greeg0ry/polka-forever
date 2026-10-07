@@ -36,6 +36,12 @@ const testFB2 = `<?xml version="1.0" encoding="UTF-8"?>
 // newTestServer starts a server with one book in a synthetic library.
 func newTestServer(t *testing.T) (*httptest.Server, int64) {
 	t.Helper()
+	return newTestServerWith(t, nil)
+}
+
+// newTestServerWith lets a test adjust the configuration before start.
+func newTestServerWith(t *testing.T, tweak func(*config.Config)) (*httptest.Server, int64) {
+	t.Helper()
 	dir := t.TempDir()
 
 	// Archive containing the book
@@ -90,6 +96,9 @@ func newTestServer(t *testing.T) (*httptest.Server, int64) {
 	t.Cleanup(func() { users.Close() })
 
 	cfg := &config.Config{LibraryDir: libDir, Auth: "public"}
+	if tweak != nil {
+		tweak(cfg)
+	}
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
 	webFS := fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("<html/>")}}
 	srv := New(cfg, log, st, library.New(libDir), users, nil, webFS)

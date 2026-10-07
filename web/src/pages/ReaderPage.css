@@ -436,7 +436,7 @@
   gap: 16px;
   max-width: 640px;
   margin: 0 auto;
-  padding: 7px 20px 9px;
+  padding: 7px 20px calc(9px + env(safe-area-inset-bottom));
   font-size: 12px;
   color: var(--reader-muted);
 }
@@ -458,7 +458,7 @@
 .reader__note {
   position: fixed;
   left: 50%;
-  bottom: 48px;
+  bottom: calc(48px + env(safe-area-inset-bottom));
   transform: translateX(-50%);
   z-index: 30;
   width: min(560px, calc(100vw - 32px));

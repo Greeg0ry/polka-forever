@@ -48,6 +48,8 @@ var serverStrings = map[string]map[string]string{
 		"upload.dbfail":        "не удалось добавить в базу",
 		"upload.dup.file":      "точная копия уже в библиотеке",
 		"upload.dup.text":      "книга с тем же текстом уже в библиотеке",
+		"convert.failed":       "не удалось сконвертировать книгу",
+		"convert.busy":         "слишком много конвертаций одновременно, попробуйте позже",
 	},
 	"en": {
 		"shelf.reading":        "Reading now",
@@ -77,6 +79,8 @@ var serverStrings = map[string]map[string]string{
 		"upload.dbfail":        "failed to add to the database",
 		"upload.dup.file":      "exact copy is already in the library",
 		"upload.dup.text":      "a book with the same text is already in the library",
+		"convert.failed":       "failed to convert the book",
+		"convert.busy":         "too many conversions in progress, try again later",
 	},
 }
 

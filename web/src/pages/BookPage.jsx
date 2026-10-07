@@ -269,7 +269,7 @@ const BookPage = ({ user, sync }) => {
     );
   }
 
-  const { bookForm, annotation, publisher, city, year, isbn } = data;
+  const { bookForm, annotation, publisher, city, year, isbn, convertFormats } = data;
   const { BookID, Title, LibRate, BookSize, Genres, Ext, FileName } = bookForm;
 
   const initials = (Title || "").trim().slice(0, 2).toUpperCase();
@@ -475,15 +475,35 @@ const BookPage = ({ user, sync }) => {
             <a className="btn btn-ghost" href={api.zipUrl(BookID)}>
               {t("book.downloadZip")}
             </a>
-            <a className="btn btn-ghost" href={api.fb2CompactUrl(BookID)}>
-              {t("book.downloadCompact", { ext: Ext || ".fb2" })}
-            </a>
+            {/* The text-only copy exists for FB2 only (binaries stripped). */}
+            {(Ext || ".fb2").toLowerCase() === ".fb2" && (
+              <a className="btn btn-ghost" href={api.fb2CompactUrl(BookID)}>
+                {t("book.downloadCompact", { ext: ".fb2" })}
+              </a>
+            )}
             {user?.role === "admin" && (
               <button type="button" className="btn btn-ghost book-page__delete" onClick={removeBook}>
                 {t("book.delete")}
               </button>
             )}
           </div>
+
+          {convertFormats?.length > 0 && (
+            <div className="book-page__formats">
+              <span className="book-page__formats-label">{t("book.formats")}</span>
+              {convertFormats.map((f) => (
+                <a
+                  className="btn btn-ghost book-page__format"
+                  key={f}
+                  href={api.convertUrl(BookID, f)}
+                  title={t("book.formats.hint", { format: f.toUpperCase() })}
+                  download
+                >
+                  {f.toUpperCase()}
+                </a>
+              ))}
+            </div>
+          )}
 
           {annotation && (
             <article className="book-page__annotation">

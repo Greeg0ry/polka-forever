@@ -61,6 +61,14 @@
   gap: 4px;
   border-bottom: 1px solid var(--border);
   padding-bottom: 0;
+  /* Four tabs with counters do not fit a phone: scroll, don't clip. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.search-page__scope-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .search-page__scope {
@@ -75,6 +83,8 @@
   color: var(--fg-muted);
   font-weight: 600;
   font-size: 14px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .search-page__scope:hover {
@@ -156,5 +166,13 @@
   .search-page__grid {
     grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
     gap: 16px 10px;
+  }
+}
+
+/* Below ~360px two 132px columns no longer fit and auto-fill fell back to
+   a single page-wide card; keep two columns and let them shrink. */
+@media (max-width: 360px) {
+  .search-page__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

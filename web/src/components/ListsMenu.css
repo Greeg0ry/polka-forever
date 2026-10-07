@@ -1,6 +1,7 @@
 .lists-menu {
   position: relative;
-  display: inline-block;
+  /* flex, so the button is as tall as its neighbours in a row of actions */
+  display: inline-flex;
 }
 
 .lists-menu__pop {
@@ -73,4 +74,28 @@
 
 .lists-menu__new .btn {
   padding: 6px 12px;
+}
+
+/* On a phone the button can sit anywhere in a wrapped row of actions, and a
+   popup anchored to it ran off the screen edge. Anchor it to the row instead
+   (the nearest positioned ancestor) and let it span the full width. */
+@media (max-width: 760px) {
+  .lists-menu {
+    position: static;
+    display: block;
+  }
+
+  .lists-menu > .btn {
+    width: 100%;
+  }
+
+  /* top: auto keeps the popup where it falls in the flow — right under
+     the button — while left/right come from the row. */
+  .lists-menu__pop {
+    top: auto;
+    left: 0;
+    right: 0;
+    min-width: 0;
+    margin-top: 6px;
+  }
 }

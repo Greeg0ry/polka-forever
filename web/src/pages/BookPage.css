@@ -88,8 +88,8 @@ a.tag {
 }
 
 a.tag:hover {
-  background: var(--accent, #3b82f6);
-  color: #fff;
+  background: var(--accent);
+  color: var(--fg-on-accent);
 }
 
 .book-page__ratings {
@@ -147,10 +147,30 @@ a.tag:hover {
 }
 
 .book-page__actions {
+  position: relative; /* anchors the lists popup on phones */
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 4px;
+}
+
+.book-page__formats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.book-page__formats-label {
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin-right: 2px;
+}
+
+.book-page__format {
+  padding: 6px 14px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
 }
 
 .book-page__annotation {
@@ -285,7 +305,9 @@ a.tag:hover {
     flex-wrap: wrap;
   }
 
-  .book-page__actions .btn {
+  /* Direct children only: buttons inside the lists popup keep their size. */
+  .book-page__actions > .btn,
+  .book-page__actions > .lists-menu {
     flex: 1 1 auto;
     text-align: center;
   }

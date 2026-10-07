@@ -49,6 +49,9 @@ mobile reading app.
 - **Send to your e-reader.** Configure SMTP once and e-mail any book straight
   to your Kindle / Kobo / PocketBook from its page (the SMTP password is stored
   encrypted).
+- **Download in the format your device reads.** FB2 books can be converted
+  on the fly to EPUB, KEPUB, KFX, PDF — and MOBI / AZW3 for older Kindles —
+  from buttons on the book page (see [Converting books](#converting-books)).
 - **Multi-user.** Accounts with admin/reader roles, per-user progress, lists
   and ratings. Or run it fully open on a trusted home network.
 - **Add books from the browser.** Upload fb2 / epub / pdf / djvu / txt / mobi;
@@ -177,6 +180,29 @@ Install [KOReader](https://koreader.rocks) on the device, then:
    password. Positions of books downloaded through Polka then follow you
    between the device, the web reader and other KOReader devices.
 
+## Converting books
+
+Polka can hand out an FB2 book in another format — the book page gets an
+*Other formats* row. The conversion is done by an external converter that
+Polka runs when a download is requested:
+
+| Converter | Formats | Notes |
+|-----------|---------|-------|
+| [`fbc`](https://github.com/rupor-github/fb2cng) (fb2cng) | EPUB, KEPUB, KFX, PDF | actively maintained, a single file |
+| [`fb2c`](https://github.com/rupor-github/fb2converter) (fb2converter) | EPUB, KEPUB; MOBI and AZW3 with Amazon's `kindlegen` beside it | end-of-life, but the only way to get MOBI / AZW3 |
+
+- **Docker**: `fbc` is already in the image (amd64 and arm64) — nothing to do.
+- **Everything else**: download a release of either tool (or both) and put
+  the binaries next to `polka`, anywhere in `PATH`, or in a folder named by
+  `--converter-dir` / `POLKA_CONVERTER_DIR`. Polka logs the formats it found
+  at startup; with no converter installed the buttons simply do not appear.
+- **MOBI / AZW3**: the `fb2c` release archives ship `kindlegen`; keep the two
+  files together. `kindlegen` is an x86 program, so this does not work on
+  ARM boards. In Docker, mount the folder and point `POLKA_CONVERTER_DIR` at it.
+
+When both tools are present `fbc` is used for everything it can produce.
+Both are GPL-3.0 programs that Polka only executes; they are not part of it.
+
 ## Configuration
 
 Everything has a sensible default. The most useful flags of `polka serve`:
@@ -187,6 +213,7 @@ Everything has a sensible default. The most useful flags of `polka serve`:
 | `--data-dir` | `~/.polka` | database, settings, covers cache |
 | `--library-dir` | — | folder with books (or inpx archives) |
 | `--auth` | `users` | `users` (accounts) or `none` (open access) |
+| `--converter-dir` | — | folder with the `fbc` / `fb2c` converters (default: next to `polka`, then `PATH`) |
 
 External rating/recommendation sources are configured in the web UI
 (*Manage → External ratings / Similar books*) and are **off by default**

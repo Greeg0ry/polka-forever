@@ -17,6 +17,10 @@
   padding: 22px 24px;
   max-width: 440px;
   width: 100%;
+  /* A short screen (phone in landscape, keyboard open) scrolls the card
+     instead of cutting its buttons off. */
+  max-height: 100%;
+  overflow-y: auto;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
 }
 
@@ -55,6 +59,7 @@
 
 .kosync__row input {
   flex: 1;
+  min-width: 0;
   font: inherit;
   font-size: 14px;
   padding: 8px 12px;

@@ -41,6 +41,7 @@ func (s *Server) registerSyncRoutes(mux *http.ServeMux) {
 		"GET /api/v1/collections/{slug}",
 		"GET /Images/zip/{id}",
 		"GET /Images/fb2compact/{id}",
+		"GET /Images/convert/{format}/{id}",
 		"GET /Images/export",
 	} {
 		mux.HandleFunc(p, proxyOnly)
